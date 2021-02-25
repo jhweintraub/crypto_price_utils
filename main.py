@@ -54,7 +54,7 @@ def main():
     print(prices)
 
     for x in prices:
-        if(x["price"]) > low_alert_amount:
+        if(x["price"]) < low_alert_amount:
             send_price_alert(x["exchange"], x["price"], True)
             low_alert_amount -= 100
             # so you don't get spammed by every exchange but do get alerted by sudden crashed
