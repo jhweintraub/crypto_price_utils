@@ -1,2 +1,2 @@
 # crypto_notifications
-Text-Alert Notifications if your specified cryptocurrency dips below a certain price
+Quick Script I wrote to text-alert me when the Price of Ethereum Jumps or Dips above/below a certain value.
