@@ -56,14 +56,14 @@ def main():
         if(x["price"]) > low_alert_amount:
             # send_price_alert(x["exchange"], x["price"], True)
             print("this is a test")
-            os.putenv("low_alert_amount", str(low_alert_amount - 100))
+            os.environ['low_alert_amount'] = str(low_alert_amount - 100)
             # print(float(os.getenv("low_alert_amount")))
             # so you don't get spammed by every exchange but do get alerted by sudden crashed
             break
 
         if (x["price"]) > high_alert_amount:
             send_price_alert(x["exchange"], x["price"], False)
-            os.putenv("high_alert_amount", str(high_alert_amount + 100))
+            os.environ['high_alert_amount'] = str(high_alert_amount + 100)
             break
 
 main()
