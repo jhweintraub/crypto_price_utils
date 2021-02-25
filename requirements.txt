@@ -1,0 +1,4 @@
+coinbase
+twilio
+python-binance
+python-dotenv
