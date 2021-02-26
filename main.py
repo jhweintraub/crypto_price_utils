@@ -51,7 +51,7 @@ def main():
     config = app.config()
 
     low_alert_amount = float(config['low_alert_amount'])
-    high_alert_amount = float(config['high_alert_amount'])
+    high_alert_amount = float(config['high_alert_amount'])	
 
     prices = []
     get_binance_price()
