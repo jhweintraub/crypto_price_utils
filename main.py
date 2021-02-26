@@ -64,11 +64,13 @@ def main():
             send_price_alert(x["exchange"], x["price"], True)
             print(config['low_alert_amount'])
             config['low_alert_amount'] = str(low_alert_amount - 100.00)
+            config['high_alert_amount'] = str(high_alert_amount - 100.00)
             # so you don't get spammed by every exchange but do get alerted by sudden crashed
             break
 
         if (x["price"]) > high_alert_amount:
             send_price_alert(x["exchange"], x["price"], False)
+            config['low_alert_amount'] = str(low_alert_amount + 100.00)
             config['high_alert_amount'] = str(high_alert_amount + 100.00)
             break
 
