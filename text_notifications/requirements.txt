@@ -1,0 +1,5 @@
+coinbase
+twilio
+python-binance
+python-dotenv
+heroku3
