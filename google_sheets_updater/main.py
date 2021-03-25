@@ -7,12 +7,13 @@ from google.oauth2.credentials import Credentials
 
 import requests
 import json
+from dotenv import load_dotenv
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-
-spreadsheet_id = '18C7kf9PI8_15i9MMfmsUxvLHPIJysZ_6-0ziP8XjAac'
+load_dotenv()
+spreadsheet_id = os.getenv("google_sheet_id")
 range_name = 'Prices!C2:E21'
 
 
@@ -72,8 +73,8 @@ def main():
 def get_price(coin):
     r = requests.get("https://api.coingecko.com/api/v3/coins/" + str(coin))
     info = json.loads(r.text)
-    print(info['market_data']['price_change_24h_in_currency']['usd'])
-
+    print(coin + ": $" + str(info['market_data']['current_price']['usd']))
+    
     return [
         info['market_data']['current_price']['usd'],
         info['market_data']['price_change_24h_in_currency']['usd'],
