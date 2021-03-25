@@ -1,87 +1,78 @@
-from __future__ import print_function
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-
 import requests
-import json
+from dotenv import load_dotenv
+import os
+from coinbase.wallet.client import Client as CoinbaseClient
+from binance.client import Client as binanceClient
+from twilio.rest import Client as twilioClient
+import heroku3
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+
+def get_coinbase_price():
+    coinbase_key = os.getenv("coinbase_api_key")
+    coinbase_secret = os.getenv("coinbase_api_secret")
+    client = CoinbaseClient(coinbase_key, coinbase_secret)
+
+    ether_price = client.get_buy_price(currency_pair='ETH-USD').amount
+    return {"exchange": "Coinbase", "price": float(ether_price)}
 
 
-spreadsheet_id = '18C7kf9PI8_15i9MMfmsUxvLHPIJysZ_6-0ziP8XjAac'
-range_name = 'Prices!C2:E21'
+def get_binance_price():
+    binance_key = os.getenv("binance_api_key")
+    binance_secret = os.getenv("binance_api_secret")
+    client = binanceClient(binance_key, binance_secret)
+    ether_price = client.get_symbol_ticker(symbol="ETHUSDT")
+    return {"exchange": "Binance", "price": float(ether_price['price'])}
 
-client_id = "869133757875-9iei0pql8cv77uqfht8d51f5r65atdgu.apps.googleusercontent.com"
-client_secret = "Rape5frcvxHnBSKhb1wGGK9E"
 
-coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
-         "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
-         "vechain", "vethor-token", "binancecoin", "bancor", "uniswap", "algorand",
-         "basic-attention-token", "aave", "cardano"]
+def send_price_alert(exchange, price, isDrop):
+    # Your Account SID from twilio.com/console
+    account_sid = os.getenv("twilio_account_sid")
+    # Your Auth Token from twilio.com/console
+    auth_token = os.getenv("twilio_auth_token")
+
+    client = twilioClient(account_sid, auth_token)
+
+    if isDrop:
+        message = "Ether Price has dropped to $" + str(price) + " on " + exchange + "!"
+    else:
+        message = "Ether Price has risen to $" + str(price) + " on " + exchange + "!"
+
+    alert = client.messages.create(
+        to=os.getenv("your_number"),
+        from_=os.getenv("twilio_phone_number"),
+        body=message)
+
 
 def main():
-    """Shows basic usage of the Sheets API.
-    Prints values from a sample spreadsheet.
-    """
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists('/Users/joshweintraub/side_projects/google_sheets_updater/token.json'):
-        creds = Credentials.from_authorized_user_file('/Users/joshweintraub/side_projects/google_sheets_updater/token.json', SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                '/Users/joshweintraub/side_projects/google_sheets_updater/credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open('/Users/joshweintraub/side_projects/google_sheets_updater/token.json', 'w') as token:
-            token.write(creds.to_json())
+    load_dotenv()
 
-    service = build('sheets', 'v4', credentials=creds)
+    cloud = heroku3.from_key(os.getenv("heroku_api_key"))
+    app = cloud.apps()['cryptocurrency-notifications']
+    config = app.config()
 
-    # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=spreadsheet_id,
-                                range=range_name).execute()
-    # values = result.get('values', [])
+    low_alert_amount = float(config['low_alert_amount'])
+    high_alert_amount = float(config['high_alert_amount'])  
 
-    values = []
-    for x in coins:
-        values.append(get_price(x))
+    prices = []
+    get_binance_price()
+    prices.append(get_coinbase_price())
+    prices.append(get_binance_price())
+    print(prices)
 
-    # values.append(get_price("bitcoin"))
+    for x in prices:
+        if (x["price"]) < low_alert_amount:
+            send_price_alert(x["exchange"], x["price"], True)
+            print(config['low_alert_amount'])
+            config['low_alert_amount'] = str(low_alert_amount - 100.00)
+            config['high_alert_amount'] = str(high_alert_amount - 100.00)
+            # so you don't get spammed by every exchange but do get alerted by sudden crashed
+            break
 
-    body = {
-        "majorDimension": "ROWS",
-        'values': values,
-        "range": range_name
-    }
-    # print(values)
-    result = service.spreadsheets().values().update(
-        spreadsheetId=spreadsheet_id, range=range_name,
-        valueInputOption="RAW", body=body).execute()
-    print('{0} cells updated.'.format(result.get('updatedCells')))
+        if (x["price"]) > high_alert_amount:
+            send_price_alert(x["exchange"], x["price"], False)
+            config['low_alert_amount'] = str(low_alert_amount + 100.00)
+            config['high_alert_amount'] = str(high_alert_amount + 100.00)
+            break
 
 
-def get_price(coin):
-    r = requests.get("https://api.coingecko.com/api/v3/coins/" + str(coin))
-    info = json.loads(r.text)
-    print(str(coin) + ": $" + str(info['market_data']['current_price']['usd']))
-
-    return [
-        info['market_data']['current_price']['usd'],
-        info['market_data']['price_change_24h_in_currency']['usd'],
-        info['market_data']['price_change_percentage_24h_in_currency']['usd']/100,
-    ]
-
-
-if __name__ == '__main__':
-    main()
+main()
