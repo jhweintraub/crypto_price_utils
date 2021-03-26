@@ -58,14 +58,14 @@ def main():
     for x in coins:
         values.append(get_price(x))
 
-    values.append(get_price("bitcoin"))
+    # values.append(get_price("bitcoin")) debugging
 
     body = {
         "majorDimension": "ROWS",
         'values': values,
         "range": range_name
     }
-    print(values)
+    # print(values) debugging
     result = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id, range=range_name,
         valueInputOption="RAW", body=body).execute()
