@@ -40,7 +40,7 @@ def main():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                '/Users/joshweintraub/side_projects/crypto_price_utils/google_sheets_updater/credentials.json', SCOPES)
+                '/home/ubuntu/crypto_price_utils/google_sheets_updater/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
@@ -65,11 +65,13 @@ def main():
         'values': values,
         "range": range_name
     }
+
     # print(values) debugging
     result = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id, range=range_name,
         valueInputOption="RAW", body=body).execute()
-    print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+    print("Time: " + datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
     time_update = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id, range=secondary_range,
