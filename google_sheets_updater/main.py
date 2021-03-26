@@ -4,6 +4,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from datetime import datetime
 
 import requests
 import json
@@ -14,13 +15,14 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 load_dotenv()
 spreadsheet_id = os.getenv("google_sheet_id")
-range_name = 'Prices!C2:E21'
+range_name = 'Prices!C2:E22'
+secondary_range = 'Prices!C27'
 
 
 coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
          "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
          "vechain", "vethor-token", "binancecoin", "bancor", "uniswap", "algorand",
-         "basic-attention-token", "aave", "cardano"]
+         "basic-attention-token", "aave", "cardano", "tornado-cash"]
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -38,7 +40,7 @@ def main():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                '/Users/joshweintraub/side_projects/crypto_price_utils/google_sheets_updater/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
@@ -56,18 +58,29 @@ def main():
     for x in coins:
         values.append(get_price(x))
 
-    # values.append(get_price("bitcoin"))
+    values.append(get_price("bitcoin"))
 
     body = {
         "majorDimension": "ROWS",
         'values': values,
         "range": range_name
     }
-    # print(values)
+    print(values)
     result = service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id, range=range_name,
         valueInputOption="RAW", body=body).execute()
-    print('{0} cells updated.'.format(result.get('updatedCells')))
+    print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+    time_update = service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id, range=secondary_range,
+        valueInputOption="RAW", body={
+            "majorDimension": "ROWS",
+            'values': [["Last Updated: " + str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))]],
+            "range": secondary_range
+        }).execute()
+
+    print('Prices: {0} cells updated.'.format(result.get('updatedCells')))
+    print('Time: {0} cells updated.'.format(time_update.get('updatedCells')))
 
 
 def get_price(coin):
