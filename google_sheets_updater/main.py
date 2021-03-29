@@ -15,8 +15,8 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 load_dotenv()
 spreadsheet_id = os.getenv("google_sheet_id")
-range_name = 'Prices!C2:E22'
-secondary_range = 'Prices!C27'
+range_name = os.getenv("prices_range")
+secondary_range = os.getenv("time_update_cell")
 
 
 coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
