@@ -94,6 +94,7 @@ def get_price(coin):
         info['market_data']['current_price']['usd'],
         info['market_data']['price_change_24h_in_currency']['usd'],
         info['market_data']['price_change_percentage_24h_in_currency']['usd']/100,
+        info['market_data']['market_cap']['usd']
     ]
 
 
