@@ -21,7 +21,7 @@ secondary_range = os.getenv("time_update_cell")
 
 coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
          "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
-         "vechain", "vethor-token", "binancecoin", "bancor", "uniswap", "algorand",
+         "vechain", "vethor-token", "binancecoin", "havven", "bancor", "uniswap", "algorand",
          "basic-attention-token", "aave", "cardano", "tornado-cash", "solana", "dogecoin", "maker", "compound-governance-token", "1inch", "internet-computer"]
 
 def main():
@@ -89,7 +89,7 @@ def get_price(coin):
     r = requests.get("https://api.coingecko.com/api/v3/coins/" + str(coin))
     info = json.loads(r.text)
     print(coin + ": $" + str(info['market_data']['current_price']['usd']))
-    
+
     return [
         info['market_data']['current_price']['usd'],
         info['market_data']['price_change_24h_in_currency']['usd'],
