@@ -90,23 +90,13 @@ def get_price(coin):
     r = requests.get("https://api.coingecko.com/api/v3/coins/" + str(coin))
     info = json.loads(r.text)
     print(coin + ": $" + str(info['market_data']['current_price']['usd']))
-    # print(coin + ": " + str(info['market_data']['circulating_supply']))
-    # print(coin + ": " + str(info['market_data']['max_supply']))
-
-    maxSupply = "N/A"
-
-    if info['market_data']['max_supply'] is not None:
-        maxSupply = info['market_data']['max_supply']
-
-
 
     return [
         info['market_data']['current_price']['usd'],
         info['market_data']['price_change_24h_in_currency']['usd'],
         info['market_data']['price_change_percentage_24h_in_currency']['usd']/100,
         info['market_data']['market_cap']['usd'],
-        info['market_data']['circulating_supply'],
-        maxSupply
+        info['market_data']['circulating_supply'] if info['market_data']['circulating_supply'] is not None else "N/A",
     ]
 
 
