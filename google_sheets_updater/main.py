@@ -17,7 +17,7 @@ load_dotenv()
 spreadsheet_id = os.getenv("google_sheet_id")
 range_name = os.getenv("prices_range")
 secondary_range = os.getenv("time_update_cell")
-
+tertiary_range = os.getenv("gas_price_cell")
 
 coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
          "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
@@ -53,7 +53,7 @@ def main():
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=spreadsheet_id,
                                 range=range_name).execute()
-    # values = result.get('values', [])
+    values = result.get('values', [])
 
     values = []
     for x in coins:
@@ -84,6 +84,22 @@ def main():
 
     print('Prices: {0} cells updated.'.format(result.get('updatedCells')))
     print('Time: {0} cells updated.'.format(time_update.get('updatedCells')))
+
+    gas_info = requests.get("https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + os.getenv("etherscan_api_key"))
+    info = json.loads(gas_info.text)
+    gas_price = info['result']['SafeGasPrice']
+    print("Gas Price: " + gas_price + " Gwei")
+
+
+    gas_update = service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id, range=tertiary_range,
+        valueInputOption="RAW", body={
+            "majorDimension": "ROWS",
+            'values': [["Gas Price: " + str(gas_price) + " Gwei"]],
+            "range": tertiary_range
+        }).execute()
+
+
 
 
 def get_price(coin):
