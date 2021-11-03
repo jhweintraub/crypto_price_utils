@@ -7,3 +7,7 @@ https://console.cloud.google.com/apis/credentials?project=crypto-prices-sheet
 Regenerate and download the client-secret file from the "Oauth 2.0 Client IDs"
 
 move it into the directory and rename is credentials.json. Be sure to change the absolute pathing of the sript
+
+Log into the AWS instance. You need to copy the token.json file from the local-domain to the remote host, because it can't be done on its own. 
+
+Token.json is generated locally, the first time the script is ran without it.
