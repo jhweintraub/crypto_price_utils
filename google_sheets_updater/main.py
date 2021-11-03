@@ -80,7 +80,7 @@ def main():
         spreadsheetId=spreadsheet_id, range=secondary_range,
         valueInputOption="RAW", body={
             "majorDimension": "ROWS",
-            'values': [["Last Updated: " + str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))]],
+            'values': [["Last Updated: " + str(datetime.now().strftime("%m/%d/%Y %I:%M:%S %p"))]],
             "range": secondary_range
         }).execute()
 
