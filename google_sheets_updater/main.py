@@ -17,12 +17,14 @@ load_dotenv()
 spreadsheet_id = os.getenv("google_sheet_id")
 range_name = os.getenv("prices_range")
 secondary_range = os.getenv("time_update_cell")
+tertiary_range = os.getenv("gas_price_cell")
+etherscan_api_key = os.getenv("etherscan_api_key")
 
 
 coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
          "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
-         "vechain", "vethor-token", "binancecoin", "bancor", "uniswap", "algorand",
-         "basic-attention-token", "aave", "ethereum-name-service", "cardano", "tornado-cash", "solana", "dogecoin", "maker", "compound-governance-token", "1inch", "internet-computer"]
+         "vechain", "vethor-token", "binancecoin", "havven", "bancor", "uniswap", "algorand",
+         "basic-attention-token", "aave", "ethereum-name-service", "cardano", "tornado-cash", "solana", "dogecoin", "maker", "compound-governance-token", "1inch", "defipulse-index", "internet-computer"]
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -40,7 +42,7 @@ def main():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                '/home/ubuntu/crypto_price_utils/google_sheets_updater/credentials.json', SCOPES)
+                'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
@@ -81,6 +83,18 @@ def main():
             "range": secondary_range
         }).execute()
 
+
+    gas_info = requests.get("https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + str(etherscan_api_key)).json()
+    gas_price = gas_info["result"]["SafeGasPrice"]
+
+    gas_price_update = service.spreadsheets().values().update(
+            spreadsheetId=spreadsheet_id, range=tertiary_range,
+            valueInputOption="RAW", body={
+                "majorDimension": "ROWS",
+                'values': [["Gas Price: " + str(gas_price) + " Gwei"]],
+                "range": tertiary_range
+            }).execute()
+
     print('Prices: {0} cells updated.'.format(result.get('updatedCells')))
     print('Time: {0} cells updated.'.format(time_update.get('updatedCells')))
 
@@ -89,12 +103,14 @@ def get_price(coin):
     r = requests.get("https://api.coingecko.com/api/v3/coins/" + str(coin))
     info = json.loads(r.text)
     print(coin + ": $" + str(info['market_data']['current_price']['usd']))
-    
+
     return [
         info['market_data']['current_price']['usd'],
         info['market_data']['price_change_24h_in_currency']['usd'],
         info['market_data']['price_change_percentage_24h_in_currency']['usd']/100,
-        info['market_data']['market_cap']['usd']
+        info['market_data']['market_cap']['usd'],
+        info['market_data']['circulating_supply'],
+        info['market_data']['total_supply']
     ]
 
 
