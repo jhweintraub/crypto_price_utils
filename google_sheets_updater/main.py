@@ -24,7 +24,8 @@ etherscan_api_key = os.getenv("etherscan_api_key")
 coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
          "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
          "vechain", "vethor-token", "binancecoin", "havven", "bancor", "uniswap", "algorand",
-         "basic-attention-token", "aave", "ethereum-name-service", "cardano", "tornado-cash", "solana", "dogecoin", "maker", "compound-governance-token", "1inch", "defipulse-index", "internet-computer"]
+         "basic-attention-token", "aave", "ethereum-name-service", "cardano", "tornado-cash", "solana", "dogecoin", "maker", "compound-governance-token", "1inch", "defipulse-index", "internet-computer",
+         "revest-finance"]
 
 def main():
     """Shows basic usage of the Sheets API.
