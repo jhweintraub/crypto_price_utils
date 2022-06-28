@@ -25,9 +25,9 @@ coins = ["bitcoin", "ethereum", "monero", "nano", "polkadot", "loopring",
          "the-graph", "decentraland", "matic-network", "chainlink", "sushi",
          "vechain", "vethor-token", "binancecoin", "havven", "bancor", "uniswap", "algorand",
          "basic-attention-token", "aave", "ethereum-name-service", "cardano", "tornado-cash", "solana", "dogecoin", "maker", "compound-governance-token", "1inch", "defipulse-index", "internet-computer",
-         "revest-finance", "frax-share", "frax-price-index-share", "merchant-token"]
+         "revest-finance", "merchant-token"]
 
-def main():
+def lambda_handler(event, context):
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
     """
@@ -113,7 +113,3 @@ def get_price(coin):
         info['market_data']['circulating_supply'],
         info['market_data']['total_supply']
     ]
-
-
-if __name__ == '__main__':
-    main()
